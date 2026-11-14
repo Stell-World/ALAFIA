@@ -7,9 +7,11 @@ import { errorHandler } from './middlewares/errorHandler.js';
 
 const app = express();
 
-app.use(cors({
-  origin: process.env.FRONTEND_ORIGIN || 'http://localhost:5173'
-}));
+const allowedOrigins = (process.env.FRONTEND_ORIGIN || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim());
+
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json({ limit: '10kb' }));
 
 app.use('/api/assistant', rateLimit({
