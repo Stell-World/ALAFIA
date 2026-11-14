@@ -20,7 +20,7 @@ const FALLBACK_REPLY =
 
 const TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS) || 15000;
 
-export async function askGemini(message) {
+export async function askGemini(messages) {
   const ai = new GoogleGenAI({
     apiKey: getGeminiApiKey(),
     httpOptions: { timeout: TIMEOUT_MS }
@@ -39,13 +39,18 @@ export async function askGemini(message) {
     try {
       const result = await ai.models.generateContent({
         model,
-        contents: message,
+        contents: Array.isArray(messages)
+          ? messages.map(({ role, content }) => ({
+            role: role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: content }]
+          }))
+          : messages,
         config
       });
       return result.text?.trim() || FALLBACK_REPLY;
     } catch (error) {
       lastError = error;
-      console.error(`Gemini (${model}) :`, error.message);
+      console.error(`Gemini request failed for configured model ${model}.`);
     }
   }
 

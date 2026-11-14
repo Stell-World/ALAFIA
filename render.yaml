@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: alafia-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: feature/backend-gemini
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm run migrate && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_ORIGIN
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-flash-latest
+      - key: GEMINI_TIMEOUT_MS
+        value: "15000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: alafia-postgres
+          property: connectionString
+      - key: DATABASE_SSL
+        value: "false"
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: SESSION_SAME_SITE
+        value: none
+
+databases:
+  - name: alafia-postgres
+    databaseName: alafia
+    user: alafia
+    plan: free
+    region: frankfurt
